@@ -1,0 +1,35 @@
+# Jekyll設定ファイル
+
+title: 在庫照会システム 仕様書
+description: 高島屋15店舗向け 追加発注・在庫照会・出荷依頼 自動化システムの要件定義書
+baseurl: "/zaiko"
+url: "https://kikuchi-mizuki.github.io"
+
+# テーマ
+theme: minima
+
+# Markdown設定
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+# プラグイン
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+
+# 除外ファイル
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - .sass-cache
+  - .jekyll-cache
+  - gemfiles
+  - requirements.txt
+  - mkdocs.yml
+  - docs/
+
+# コレクション設定なし（シンプルなページ構造）
