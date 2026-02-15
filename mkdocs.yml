@@ -44,7 +44,11 @@ markdown_extensions:
   - admonition
   - codehilite
   - pymdownx.details
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.tasklist:
@@ -56,6 +60,7 @@ markdown_extensions:
 
 nav:
   - ホーム: index.md
+  - クライアント向け提案書: proposal.md
   - 要件定義書:
       - 概要: requirements/overview.md
       - システム構成: requirements/system.md

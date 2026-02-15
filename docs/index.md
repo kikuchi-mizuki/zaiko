@@ -46,6 +46,9 @@
 
 ### クイックリンク
 
+!!! tip "クライアント向け資料"
+    **[📄 クライアント向け提案書](proposal.md)** - システム概要を1ページで分かりやすく解説
+
 - [GitHub リポジトリ](https://github.com/kikuchi-mizuki/zaiko)
 - [未確定事項チェックリスト](requirements/todo.md)
 - [データベース設計](requirements/database.md)
