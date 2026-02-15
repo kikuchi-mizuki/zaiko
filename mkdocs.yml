@@ -11,14 +11,7 @@ theme:
   language: ja
   palette:
     scheme: default
-    primary: white
-    accent: blue
-  features:
-    - navigation.top
-    - search.suggest
-    - search.highlight
-    - content.code.copy
-    - toc.integrate
+  features: []
 
 extra_css:
   - stylesheets/extra.css
