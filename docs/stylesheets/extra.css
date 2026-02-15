@@ -1,0 +1,131 @@
+/* シンプルでクリーンなデザイン */
+
+:root {
+  --md-primary-fg-color: #ffffff;
+  --md-primary-bg-color: #000000;
+  --md-accent-fg-color: #2196f3;
+}
+
+/* コンテンツ幅を広げる */
+.md-main__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ヘッダーをシンプルに */
+.md-header {
+  background-color: #4051b5;
+  box-shadow: 0 0 0.2rem rgba(0,0,0,0.1);
+}
+
+/* サイドバーを非表示（シンプルな1カラムレイアウト） */
+.md-sidebar {
+  display: none;
+}
+
+/* コンテンツエリアの調整 */
+.md-content {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* テーブルのスタイル */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.5em 0;
+}
+
+table th {
+  background-color: #f5f5f5;
+  font-weight: 600;
+  padding: 12px;
+  text-align: left;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+table tr:hover {
+  background-color: #f9f9f9;
+}
+
+/* コードブロックのスタイル */
+code {
+  background-color: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+pre code {
+  background-color: #f8f8f8;
+  display: block;
+  padding: 1em;
+  border-left: 3px solid #2196f3;
+}
+
+/* 見出しのスタイル */
+h1 {
+  border-bottom: 3px solid #4051b5;
+  padding-bottom: 0.5em;
+  margin-top: 1.5em;
+}
+
+h2 {
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 0.3em;
+  margin-top: 1.5em;
+}
+
+h3 {
+  color: #4051b5;
+  margin-top: 1.2em;
+}
+
+/* リンクのスタイル */
+a {
+  color: #2196f3;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* admonition（注意書き）のスタイル */
+.admonition {
+  margin: 1.5em 0;
+  padding: 0.6em;
+  border-left: 4px solid #2196f3;
+  background-color: #f5f9fc;
+}
+
+.admonition.tip {
+  border-left-color: #00c853;
+  background-color: #f1f8f4;
+}
+
+.admonition.warning {
+  border-left-color: #ff9800;
+  background-color: #fff8e1;
+}
+
+.admonition.note {
+  border-left-color: #2196f3;
+  background-color: #e3f2fd;
+}
+
+/* 目次のスタイル */
+.md-nav--primary .md-nav__item {
+  margin: 0.3em 0;
+}
+
+/* フッターをシンプルに */
+.md-footer {
+  background-color: #f5f5f5;
+  color: #666;
+}

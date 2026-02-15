@@ -10,31 +10,18 @@ theme:
   name: material
   language: ja
   palette:
-    # Light mode
-    - scheme: default
-      primary: indigo
-      accent: indigo
-      toggle:
-        icon: material/brightness-7
-        name: ダークモードに切り替え
-    # Dark mode
-    - scheme: slate
-      primary: indigo
-      accent: indigo
-      toggle:
-        icon: material/brightness-4
-        name: ライトモードに切り替え
+    scheme: default
+    primary: white
+    accent: blue
   features:
-    - navigation.tabs
-    - navigation.sections
-    - navigation.expand
     - navigation.top
-    - navigation.tracking
     - search.suggest
     - search.highlight
     - content.code.copy
-    - content.code.annotate
-    - toc.follow
+    - toc.integrate
+
+extra_css:
+  - stylesheets/extra.css
 
 plugins:
   - search:
@@ -59,18 +46,18 @@ markdown_extensions:
       toc_depth: 3
 
 nav:
-  - ホーム: index.md
-  - クライアント向け提案書: proposal.md
-  - 要件定義書:
-      - 概要: requirements/overview.md
-      - システム構成: requirements/system.md
-      - ユーザーと権限: requirements/users.md
-      - 業務フロー: requirements/workflow.md
-      - 機能要件: requirements/features.md
-      - LINE UI設計: requirements/line-ui.md
-      - データベース設計: requirements/database.md
-      - Excel在庫同期: requirements/excel-sync.md
-      - 納品書生成: requirements/documents.md
-      - 非機能要件: requirements/non-functional.md
-      - フェーズ: requirements/phases.md
-      - 未確定事項: requirements/todo.md
+  - トップ: index.md
+  - 📄 クライアント向け提案書: proposal.md
+  - 📋 詳細仕様書:
+      - 1. 概要: requirements/overview.md
+      - 2. システム構成: requirements/system.md
+      - 3. ユーザーと権限: requirements/users.md
+      - 4. 業務フロー: requirements/workflow.md
+      - 5. 機能要件: requirements/features.md
+      - 6. LINE UI設計: requirements/line-ui.md
+      - 7. データベース設計: requirements/database.md
+      - 8. Excel在庫同期: requirements/excel-sync.md
+      - 9. 納品書生成: requirements/documents.md
+      - 10. 非機能要件: requirements/non-functional.md
+      - 11. フェーズ: requirements/phases.md
+      - 12. 未確定事項: requirements/todo.md
