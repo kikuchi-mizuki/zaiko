@@ -1,6 +1,6 @@
 ---
-layout: default
-title: クライアント向け提案書
+layout: proposal
+title: 提案書
 ---
 
 # 高島屋15店舗向け 追加発注・在庫照会システム
