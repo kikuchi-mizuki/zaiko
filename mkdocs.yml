@@ -7,11 +7,8 @@ repo_name: kikuchi-mizuki/zaiko
 repo_url: https://github.com/kikuchi-mizuki/zaiko
 
 theme:
-  name: material
-  language: ja
-  palette:
-    scheme: default
-  features: []
+  name: readthedocs
+  locale: ja
 
 extra_css:
   - stylesheets/extra.css
