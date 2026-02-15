@@ -1,0 +1,71 @@
+site_name: 高島屋15店舗向け 追加発注・在庫照会システム
+site_description: 追加発注・在庫照会・出荷依頼 自動化システムの要件定義書
+site_author: kikuchi-mizuki
+site_url: https://kikuchi-mizuki.github.io/zaiko/
+
+repo_name: kikuchi-mizuki/zaiko
+repo_url: https://github.com/kikuchi-mizuki/zaiko
+
+theme:
+  name: material
+  language: ja
+  palette:
+    # Light mode
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: ダークモードに切り替え
+    # Dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: ライトモードに切り替え
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.tracking
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - toc.follow
+
+plugins:
+  - search:
+      lang: ja
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - tables
+  - toc:
+      permalink: true
+      toc_depth: 3
+
+nav:
+  - ホーム: index.md
+  - 要件定義書:
+      - 概要: requirements/overview.md
+      - システム構成: requirements/system.md
+      - ユーザーと権限: requirements/users.md
+      - 業務フロー: requirements/workflow.md
+      - 機能要件: requirements/features.md
+      - LINE UI設計: requirements/line-ui.md
+      - データベース設計: requirements/database.md
+      - Excel在庫同期: requirements/excel-sync.md
+      - 納品書生成: requirements/documents.md
+      - 非機能要件: requirements/non-functional.md
+      - フェーズ: requirements/phases.md
+      - 未確定事項: requirements/todo.md
