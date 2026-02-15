@@ -50,7 +50,7 @@ title: クライアント向け提案書
 
 ## 🔄 業務フロー
 
-```mermaid
+<div class="mermaid">
 flowchart TD
     A[店舗<br/>LINE] -->|① 在庫照会・発注依頼| B[本部<br/>LINE/PC]
     B -->|② 承認・差戻し・一部承認| C[システム]
@@ -62,7 +62,7 @@ flowchart TD
     style C fill:#f0e1ff
     style D fill:#e1ffe1
     style E fill:#ffe1e1
-```
+</div>
 
 ---
 
