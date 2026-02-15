@@ -176,13 +176,6 @@ flowchart TD
 
 ---
 
-## 📞 お問い合わせ
-
-- **詳細仕様書**: [要件定義書を見る](requirements/overview.md)
-- **GitHub**: [https://github.com/kikuchi-mizuki/zaiko](https://github.com/kikuchi-mizuki/zaiko)
-
----
-
 ## ✅ まとめ
 
 ### このシステムで実現すること
