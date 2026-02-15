@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="kikuchi-mizuki" /><link rel="canonical" href="https://kikuchi-mizuki.github.io/zaiko/requirements/line-ui/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>6. LINE UI設計 - 高島屋15店舗向け 追加発注・在庫照会システム</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../stylesheets/extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "6. LINE UI\u8a2d\u8a08";
+        var mkdocs_page_input_path = "requirements/line-ui.md";
+        var mkdocs_page_url = "/zaiko/requirements/line-ui/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> 高島屋15店舗向け 追加発注・在庫照会システム
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="ドキュメントを検索" aria-label="ドキュメントを検索" title="検索語句を入力してください" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="ナビゲーションメニュー">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">トップ</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../proposal/">📄 クライアント向け提案書</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">📋 詳細仕様書</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../overview/">1. 概要</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../system/">2. システム構成</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../users/">3. ユーザーと権限</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../workflow/">4. 業務フロー</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../features/">5. 機能要件</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">6. LINE UI設計</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#_1">リッチメニュー</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_2">店舗マネージャー向け</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_3">本部バイヤー向け</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_4">主要フロー</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_5">在庫照会フロー</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_6">追加発注フロー</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#line">本部承認フロー（LINE）</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_11">依頼状況確認フロー</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#ui">UI コンポーネント</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_12">クイックリプライ</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#flex-message">Flex Message</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_13">テキスト入力</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_14">エラーメッセージ</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_15">入力エラー</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_16">システムエラー</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_17">権限エラー</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_18">初回登録フロー</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_19">店舗マネージャー</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_20">本部バイヤー（招待コード）</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_21">通知タイミング</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_22">店舗への通知</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_23">本部への通知</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_24">管理者への通知</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../database/">7. データベース設計</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../excel-sync/">8. Excel在庫同期</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../documents/">9. 納品書生成</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../non-functional/">10. 非機能要件</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../phases/">11. フェーズ</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../todo/">12. 未確定事項</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="モバイルナビゲーションメニュー">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">高島屋15店舗向け 追加発注・在庫照会システム</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="ドキュメント"></a></li>
+          <li class="breadcrumb-item">📋 詳細仕様書</li>
+      <li class="breadcrumb-item active">6. LINE UI設計</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/kikuchi-mizuki/zaiko/edit/master/docs/requirements/line-ui.md">kikuchi-mizuki/zaiko で編集</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="line-ui">LINE UI 設計<a class="headerlink" href="#line-ui" title="Permanent link">&para;</a></h1>
+<h2 id="_1">リッチメニュー<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<h3 id="_2">店舗マネージャー向け<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>┌────────────────┬────────────────┐
+│   在庫照会      │   追加発注     │
+├────────────────┼────────────────┤
+│  依頼状況確認   │   ヘルプ      │
+└────────────────┴────────────────┘
+</code></pre></div>
+<h3 id="_3">本部バイヤー向け<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>┌────────────────┬────────────────┐
+│  承認待ち一覧   │  全依頼確認    │
+├────────────────┼────────────────┤
+│  管理画面へ     │   ヘルプ      │
+└────────────────┴────────────────┘
+</code></pre></div>
+<hr />
+<h2 id="_4">主要フロー<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<h3 id="_5">在庫照会フロー<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>店舗: [在庫照会] タップ
+
+BOT: 商品を選択してください
+     [生チョコレート]
+     [トリュフ]
+     [マカロン]
+     ...
+
+店舗: [生チョコレート] 選択
+
+BOT: 【在庫照会結果】
+     商品: 生チョコレート
+     在庫: 10ケース
+     ※この情報は2時間前のものです
+
+     納品日は別途ご連絡します。
+</code></pre></div>
+<h3 id="_6">追加発注フロー<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>店舗: [追加発注] タップ
+
+BOT: 商品を選択してください
+     [生チョコレート]
+     [トリュフ]
+     [マカロン]
+     ...
+
+店舗: [生チョコレート] 選択
+
+BOT: 数量（ケース数）を入力してください
+
+店舗: 「10」と入力
+
+BOT: 希望納品日はありますか？
+     [できるだけ早く]
+     [日付を指定]
+     [特になし]
+
+店舗: [できるだけ早く] 選択
+
+BOT: 【確認】
+     商品: 生チョコレート
+     数量: 10ケース
+     希望: できるだけ早く
+
+     この内容で発注依頼しますか？
+     [はい] [いいえ]
+
+店舗: [はい]
+
+BOT: 発注依頼を受け付けました。
+     本部承認後、詳細をご連絡します。
+</code></pre></div>
+<h3 id="line">本部承認フロー（LINE）<a class="headerlink" href="#line" title="Permanent link">&para;</a></h3>
+<h4 id="_7">承認依頼通知<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>BOT → 本部:
+【承認依頼】
+店舗: 高島屋新宿店
+商品: 生チョコレート
+数量: 10ケース
+希望日: できるだけ早く
+
+在庫: 10ケース（※2時間前）
+
+[全量承認] [一部承認] [差戻し]
+</code></pre></div>
+<h4 id="_8">一部承認の場合<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>本部: [一部承認] タップ
+
+BOT: 承認する数量を入力してください
+
+本部: 「7」と入力
+
+BOT: 【確認】
+     依頼数量: 10ケース
+     承認数量: 7ケース
+     保留数量: 3ケース
+
+     7ケースを承認し、残り3ケースは在庫待ちとして登録します。
+     よろしいですか？
+     [はい] [いいえ]
+
+本部: [はい]
+
+BOT: 承認しました。
+     店舗に通知し、出荷依頼を送信しました。
+</code></pre></div>
+<h4 id="_9">店舗への一部承認通知<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>BOT → 店舗:
+【一部承認】
+依頼数量: 10ケース
+承認数量: 7ケース
+保留数量: 3ケース
+
+7ケースは出荷手続きを進めます。
+残り3ケースは在庫が確保でき次第、別途ご連絡します。
+
+[了解] [残り3ケースをキャンセル]
+</code></pre></div>
+<h4 id="_10">差戻しの場合<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code>本部: [差戻し] タップ
+
+BOT: 差戻し理由を入力してください
+
+本部: 「商品の選択を間違えています」と入力
+
+BOT: 差戻しました。店舗に通知します。
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>BOT → 店舗:
+【差戻し】
+商品: 生チョコレート
+数量: 10ケース
+
+理由: 商品の選択を間違えています
+
+[修正して再依頼] [キャンセル]
+</code></pre></div>
+<h3 id="_11">依頼状況確認フロー<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>店舗: [依頼状況確認] タップ
+
+BOT: 【現在の依頼状況】
+
+     1. 生チョコレート 10ケース
+        状態: 本部承認待ち
+        依頼日: 2026/02/15
+
+     2. トリュフ 5ケース
+        状態: 出荷済み
+        依頼日: 2026/02/10
+        出荷日: 2026/02/13
+
+     3. マカロン 8ケース
+        状態: 一部承認（6ケース承認、2ケース保留）
+        依頼日: 2026/02/14
+
+     [詳細を見る] [閉じる]
+</code></pre></div>
+<hr />
+<h2 id="ui">UI コンポーネント<a class="headerlink" href="#ui" title="Permanent link">&para;</a></h2>
+<h3 id="_12">クイックリプライ<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
+<p>商品選択、希望納品日選択で使用</p>
+<p><strong>特徴</strong>:
+- 最大13個まで表示可能
+- タップで即座に選択完了</p>
+<h3 id="flex-message">Flex Message<a class="headerlink" href="#flex-message" title="Permanent link">&para;</a></h3>
+<p>承認依頼通知で使用</p>
+<p><strong>特徴</strong>:
+- カード型のリッチなメッセージ
+- ボタンを複数配置可能</p>
+<h3 id="_13">テキスト入力<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h3>
+<p>数量入力、理由入力で使用</p>
+<p><strong>バリデーション</strong>:
+- 数量: 整数チェック
+- 理由: 最大200文字</p>
+<hr />
+<h2 id="_14">エラーメッセージ<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h2>
+<h3 id="_15">入力エラー<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>BOT: 数量は整数で入力してください。
+     例: 10
+</code></pre></div>
+<h3 id="_16">システムエラー<a class="headerlink" href="#_16" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>BOT: システムエラーが発生しました。
+     しばらく経ってから再度お試しください。
+
+     エラーコード: ERR-001
+</code></pre></div>
+<h3 id="_17">権限エラー<a class="headerlink" href="#_17" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>BOT: この操作を行う権限がありません。
+     管理者にお問い合わせください。
+</code></pre></div>
+<hr />
+<h2 id="_18">初回登録フロー<a class="headerlink" href="#_18" title="Permanent link">&para;</a></h2>
+<h3 id="_19">店舗マネージャー<a class="headerlink" href="#_19" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>店舗: LINE友だち追加
+
+BOT: 初めてのご利用ですね。
+     担当店舗を選択してください。
+
+     [高島屋新宿店]
+     [高島屋横浜店]
+     [高島屋大阪店]
+     ...
+
+店舗: [高島屋新宿店] 選択
+
+BOT: 登録が完了しました。
+     下のメニューから操作できます。
+
+     [在庫照会] [追加発注] [依頼状況確認] [ヘルプ]
+</code></pre></div>
+<h3 id="_20">本部バイヤー（招待コード）<a class="headerlink" href="#_20" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>本部: LINE友だち追加
+
+BOT: 初めてのご利用ですね。
+     招待コードを入力してください。
+
+本部: 「BUYER-ABC123」と入力
+
+BOT: 招待コードを確認しました。
+     本部バイヤーとして登録が完了しました。
+
+     [承認待ち一覧] [全依頼確認] [管理画面へ] [ヘルプ]
+</code></pre></div>
+<hr />
+<h2 id="_21">通知タイミング<a class="headerlink" href="#_21" title="Permanent link">&para;</a></h2>
+<h3 id="_22">店舗への通知<a class="headerlink" href="#_22" title="Permanent link">&para;</a></h3>
+<ul>
+<li>発注依頼受付完了</li>
+<li>本部承認完了</li>
+<li>一部承認完了（保留分の説明含む）</li>
+<li>差戻し</li>
+<li>出荷完了</li>
+<li>仮引当期限切れ警告</li>
+</ul>
+<h3 id="_23">本部への通知<a class="headerlink" href="#_23" title="Permanent link">&para;</a></h3>
+<ul>
+<li>新規発注依頼</li>
+<li>店舗が修正再提出</li>
+</ul>
+<h3 id="_24">管理者への通知<a class="headerlink" href="#_24" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Excel同期エラー</li>
+<li>在庫引当失敗</li>
+<li>システムエラー</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="フッターナビゲーション">
+        <a href="../features/" class="btn btn-neutral float-left" title="5. 機能要件"><span class="icon icon-circle-arrow-left"></span> 前へ</a>
+        <a href="../database/" class="btn btn-neutral float-right" title="7. データベース設計">次へ <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  <a href="https://readthedocs.org">Read the Docs</a> 提供の <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> を使って <a href="https://www.mkdocs.org/">MkDocs</a> でビルドされました。
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="バージョン">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/kikuchi-mizuki/zaiko" class="fa fa-code-fork" style="color: #fcfcfc"> kikuchi-mizuki/zaiko</a>
+        </span>
+    
+    
+      <span><a href="../features/" style="color: #fcfcfc">&laquo; 前へ</a></span>
+    
+    
+      <span><a href="../database/" style="color: #fcfcfc">次へ &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

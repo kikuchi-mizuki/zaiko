@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="kikuchi-mizuki" /><link rel="canonical" href="https://kikuchi-mizuki.github.io/zaiko/requirements/workflow/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>4. 業務フロー - 高島屋15店舗向け 追加発注・在庫照会システム</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../stylesheets/extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "4. \u696d\u52d9\u30d5\u30ed\u30fc";
+        var mkdocs_page_input_path = "requirements/workflow.md";
+        var mkdocs_page_url = "/zaiko/requirements/workflow/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> 高島屋15店舗向け 追加発注・在庫照会システム
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="ドキュメントを検索" aria-label="ドキュメントを検索" title="検索語句を入力してください" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="ナビゲーションメニュー">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">トップ</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../proposal/">📄 クライアント向け提案書</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">📋 詳細仕様書</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../overview/">1. 概要</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../system/">2. システム構成</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../users/">3. ユーザーと権限</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">4. 業務フロー</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#_2">追加発注（店舗 → 本部）</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#line">店舗側（LINE）</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#line-or">本部側（LINE or 管理画面）</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_6">在庫照会（店舗 → システム）</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#line_1">店舗側（LINE）</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_7">出荷依頼（本部 → 加工会社）</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_8">仮引当期限切れ</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_9">自動チェック</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_10">期限切れ発見時</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_11">一部承認の詳細フロー</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_12">シナリオ例</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_13">システムの動作</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_14">データの変化</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_15">フロー図まとめ</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../features/">5. 機能要件</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../line-ui/">6. LINE UI設計</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../database/">7. データベース設計</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../excel-sync/">8. Excel在庫同期</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../documents/">9. 納品書生成</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../non-functional/">10. 非機能要件</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../phases/">11. フェーズ</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../todo/">12. 未確定事項</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="モバイルナビゲーションメニュー">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">高島屋15店舗向け 追加発注・在庫照会システム</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="ドキュメント"></a></li>
+          <li class="breadcrumb-item">📋 詳細仕様書</li>
+      <li class="breadcrumb-item active">4. 業務フロー</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/kikuchi-mizuki/zaiko/edit/master/docs/requirements/workflow.md">kikuchi-mizuki/zaiko で編集</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="_1">業務フロー<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
+<h2 id="_2">追加発注（店舗 → 本部）<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h3 id="line">店舗側（LINE）<a class="headerlink" href="#line" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>[在庫照会] または [追加発注] をタップ</strong></li>
+<li><strong>商品選択</strong>（クイックリプライで選択）</li>
+<li><strong>数量入力</strong>（ケース単位のみ、整数）</li>
+<li><strong>希望納品日選択</strong></li>
+<li>できるだけ早く</li>
+<li>日付指定</li>
+<li>特になし</li>
+<li><strong>確認画面で [はい]</strong></li>
+<li><strong>システムが受付</strong>（status: <code>pending_approval</code>）</li>
+</ol>
+<h3 id="line-or">本部側（LINE or 管理画面）<a class="headerlink" href="#line-or" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>承認依頼通知を受信</strong>（希望納品日順でソート）</li>
+<li><strong>在庫を確認して以下のいずれかを選択</strong>:</li>
+</ol>
+<h4 id="_3">全量承認<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h4>
+<ul>
+<li>→ <code>approved</code></li>
+<li>→ 自動で在庫引当（<code>allocated_hold</code>）</li>
+</ul>
+<h4 id="_4">一部承認<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h4>
+<ul>
+<li>承認数量を入力</li>
+<li>元リクエストは承認数量で確定</li>
+<li>残りは新規リクエスト（<code>pending_inventory</code>）として自動作成</li>
+</ul>
+<h4 id="_5">差戻し<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h4>
+<ul>
+<li>理由入力</li>
+<li>→ 店舗に通知（status: <code>rejected</code>）</li>
+</ul>
+<h2 id="_6">在庫照会（店舗 → システム）<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<h3 id="line_1">店舗側（LINE）<a class="headerlink" href="#line_1" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>[在庫照会] をタップ</strong></li>
+<li><strong>商品選択</strong></li>
+<li><strong>システムが在庫数量を回答</strong>:</li>
+</ol>
+<div class="highlight"><pre><span></span><code>【在庫照会結果】
+商品: ○○
+在庫: 10ケース
+※この情報は2時間前のものです
+
+納品日は別途ご連絡します。
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">納品日について</p>
+<p>在庫数量のみリアルタイムで回答し、納品日は従来通り人が連絡します。</p>
+</div>
+<h2 id="_7">出荷依頼（本部 → 加工会社）<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>本部承認</strong></li>
+<li>→ <code>shipment_requested</code> に自動遷移</li>
+<li><strong>納品書PDF自動生成</strong></li>
+<li>→ Supabase Storage保存</li>
+<li><strong>加工会社に通知</strong>（通知方法は後日確定）</li>
+<li><strong>加工会社が出荷完了報告</strong></li>
+<li>→ <code>shipped</code></li>
+</ol>
+<h2 id="_8">仮引当期限切れ<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h2>
+<h3 id="_9">自動チェック<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
+<p>Cron（1時間毎）が <code>allocations.expires_at</code> をチェック</p>
+<h3 id="_10">期限切れ発見時<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>店舗マネージャーにLINE通知</strong></li>
+<li>「まだ必要ですか？」</li>
+<li><strong>管理画面の「期限切れ一覧」に表示</strong></li>
+<li><strong>自動解放はしない</strong>（Phase1では手動対応）</li>
+</ul>
+<h2 id="_11">一部承認の詳細フロー<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h2>
+<h3 id="_12">シナリオ例<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
+<p>店舗が10ケース依頼、在庫は7ケースのみ</p>
+<h3 id="_13">システムの動作<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h3>
+<pre class="mermaid"><code>sequenceDiagram
+    participant 店舗
+    participant 本部
+    participant システム
+
+    店舗-&gt;&gt;システム: 10ケース発注依頼
+    システム-&gt;&gt;本部: 承認依頼通知
+    本部-&gt;&gt;システム: 7ケース承認（一部承認）
+
+    Note over システム: 元リクエスト(R1)を7ケースに更新&lt;br/&gt;残り3ケースで新リクエスト(R2)作成
+
+    システム-&gt;&gt;店舗: 【一部承認】通知&lt;br/&gt;「7ケース承認、残り3ケースは在庫待ち」
+    システム-&gt;&gt;加工会社: 7ケースの出荷依頼
+
+    Note over システム: R2は pending_inventory で待機
+
+    店舗-&gt;&gt;システム: [了解] or [残り3ケースをキャンセル]
+
+    alt 了解
+        Note over システム: R2は在庫確保でき次第処理
+    else キャンセル
+        システム-&gt;&gt;システム: R2を cancelled に更新
+    end</code></pre>
+<h3 id="_14">データの変化<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h3>
+<p><strong>元のリクエスト（R1）</strong>:
+<div class="highlight"><pre><span></span><code><span class="n">qty_requested</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="mi">7</span>
+<span class="n">approved_qty</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span>
+<span class="n">status</span><span class="p">:</span><span class="w"> </span><span class="n">approved</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">allocated_hold</span>
+</code></pre></div></p>
+<p><strong>新しいリクエスト（R2）</strong>:
+<div class="highlight"><pre><span></span><code><span class="n">parent_request_id</span><span class="p">:</span><span class="w"> </span><span class="n">R1</span>
+<span class="n">qty_requested</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span>
+<span class="n">status</span><span class="p">:</span><span class="w"> </span><span class="n">pending_inventory</span>
+</code></pre></div></p>
+<h2 id="_15">フロー図まとめ<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h2>
+<pre class="mermaid"><code>flowchart TD
+    A[店舗が発注依頼] --&gt; B{在庫確認}
+    B --&gt;|全量あり| C[全量承認]
+    B --&gt;|一部のみ| D[一部承認]
+    B --&gt;|在庫不足| E[差戻し]
+
+    C --&gt; F[自動で仮引当]
+    D --&gt; G[承認分を仮引当]
+    D --&gt; H[残りは新リクエスト&lt;br/&gt;pending_inventory]
+
+    F --&gt; I[出荷依頼]
+    G --&gt; I
+
+    E --&gt; J[店舗が修正再提出]
+    J --&gt; A
+
+    H --&gt; K{在庫入荷}
+    K --&gt;|入荷| C
+    K --&gt;|店舗キャンセル| L[cancelled]
+
+    I --&gt; M[納品書PDF生成]
+    M --&gt; N[加工会社に通知]
+    N --&gt; O[出荷完了報告]
+    O --&gt; P[shipped]</code></pre>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="フッターナビゲーション">
+        <a href="../users/" class="btn btn-neutral float-left" title="3. ユーザーと権限"><span class="icon icon-circle-arrow-left"></span> 前へ</a>
+        <a href="../features/" class="btn btn-neutral float-right" title="5. 機能要件">次へ <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  <a href="https://readthedocs.org">Read the Docs</a> 提供の <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> を使って <a href="https://www.mkdocs.org/">MkDocs</a> でビルドされました。
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="バージョン">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/kikuchi-mizuki/zaiko" class="fa fa-code-fork" style="color: #fcfcfc"> kikuchi-mizuki/zaiko</a>
+        </span>
+    
+    
+      <span><a href="../users/" style="color: #fcfcfc">&laquo; 前へ</a></span>
+    
+    
+      <span><a href="../features/" style="color: #fcfcfc">次へ &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

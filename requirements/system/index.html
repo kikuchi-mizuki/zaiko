@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="kikuchi-mizuki" /><link rel="canonical" href="https://kikuchi-mizuki.github.io/zaiko/requirements/system/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>2. システム構成 - 高島屋15店舗向け 追加発注・在庫照会システム</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../stylesheets/extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "2. \u30b7\u30b9\u30c6\u30e0\u69cb\u6210";
+        var mkdocs_page_input_path = "requirements/system.md";
+        var mkdocs_page_url = "/zaiko/requirements/system/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> 高島屋15店舗向け 追加発注・在庫照会システム
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="ドキュメントを検索" aria-label="ドキュメントを検索" title="検索語句を入力してください" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="ナビゲーションメニュー">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">トップ</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../proposal/">📄 クライアント向け提案書</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">📋 詳細仕様書</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../overview/">1. 概要</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">2. システム構成</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#_2">技術スタック</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_3">フロント</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_4">バックエンド</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_5">データベース</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_6">認証</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_7">ファイルストレージ</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_8">ジョブ実行</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_9">在庫入力元</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_10">帳票生成</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_11">アーキテクチャ図</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_12">デプロイメント</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#phase1">Phase1（想定）</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_13">将来の拡張</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../users/">3. ユーザーと権限</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../workflow/">4. 業務フロー</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../features/">5. 機能要件</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../line-ui/">6. LINE UI設計</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../database/">7. データベース設計</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../excel-sync/">8. Excel在庫同期</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../documents/">9. 納品書生成</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../non-functional/">10. 非機能要件</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../phases/">11. フェーズ</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../todo/">12. 未確定事項</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="モバイルナビゲーションメニュー">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">高島屋15店舗向け 追加発注・在庫照会システム</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="ドキュメント"></a></li>
+          <li class="breadcrumb-item">📋 詳細仕様書</li>
+      <li class="breadcrumb-item active">2. システム構成</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/kikuchi-mizuki/zaiko/edit/master/docs/requirements/system.md">kikuchi-mizuki/zaiko で編集</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="_1">システム構成<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
+<h2 id="_2">技術スタック<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h3 id="_3">フロント<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>LINE Official Account</strong>（Messaging API）</li>
+</ul>
+<h3 id="_4">バックエンド<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Python</strong>（FastAPI想定）</li>
+</ul>
+<h3 id="_5">データベース<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Supabase</strong>（PostgreSQL + RLS）</li>
+</ul>
+<h3 id="_6">認証<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>LINE</strong>: LINE User ID ベース（<code>line_users</code> テーブル）</li>
+<li><strong>管理画面</strong>: Supabase Auth（Email + Password）</li>
+</ul>
+<h3 id="_7">ファイルストレージ<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
+<p>Supabase Storage を使用：</p>
+<ul>
+<li><strong>納品書PDF</strong>: <code>documents</code> bucket</li>
+<li><strong>在庫Excel</strong>: <code>inventory</code> bucket</li>
+</ul>
+<h3 id="_8">ジョブ実行<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<p>Supabase Cron（または外部cron）で以下を実行：</p>
+<ul>
+<li><strong>Excel同期</strong>: 5分毎</li>
+<li><strong>仮引当期限チェック</strong>: 1時間毎</li>
+</ul>
+<h3 id="_9">在庫入力元<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Phase1</strong>: Excel（手動アップロード）</li>
+<li><strong>Phase2</strong>: 自動アップロード（Googleドライブ連携など）</li>
+</ul>
+<h3 id="_10">帳票生成<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>PDF自動生成</strong>: reportlab or openpyxl想定</li>
+</ul>
+<h2 id="_11">アーキテクチャ図<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>┌─────────────┐
+│  店舗/本部  │
+│   (LINE)    │
+└──────┬──────┘
+       │
+       ↓
+┌─────────────────────┐
+│   FastAPI Backend   │
+│  (Python)           │
+└──────┬──────────────┘
+       │
+       ↓
+┌─────────────────────┐
+│    Supabase         │
+│  ・PostgreSQL       │
+│  ・Storage          │
+│  ・Auth             │
+│  ・Cron             │
+└─────────────────────┘
+</code></pre></div>
+<h2 id="_12">デプロイメント<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h2>
+<h3 id="phase1">Phase1（想定）<a class="headerlink" href="#phase1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Backend</strong>: Cloud Run / Railway / Render</li>
+<li><strong>DB</strong>: Supabase（クラウド）</li>
+<li><strong>ストレージ</strong>: Supabase Storage</li>
+<li><strong>Cron</strong>: Supabase Cron</li>
+</ul>
+<h3 id="_13">将来の拡張<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h3>
+<ul>
+<li>スケールアウト対応</li>
+<li>CDN導入（PDF配信高速化）</li>
+<li>マルチリージョン対応</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="フッターナビゲーション">
+        <a href="../overview/" class="btn btn-neutral float-left" title="1. 概要"><span class="icon icon-circle-arrow-left"></span> 前へ</a>
+        <a href="../users/" class="btn btn-neutral float-right" title="3. ユーザーと権限">次へ <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  <a href="https://readthedocs.org">Read the Docs</a> 提供の <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> を使って <a href="https://www.mkdocs.org/">MkDocs</a> でビルドされました。
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="バージョン">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/kikuchi-mizuki/zaiko" class="fa fa-code-fork" style="color: #fcfcfc"> kikuchi-mizuki/zaiko</a>
+        </span>
+    
+    
+      <span><a href="../overview/" style="color: #fcfcfc">&laquo; 前へ</a></span>
+    
+    
+      <span><a href="../users/" style="color: #fcfcfc">次へ &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

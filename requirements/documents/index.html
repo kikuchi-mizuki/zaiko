@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="kikuchi-mizuki" /><link rel="canonical" href="https://kikuchi-mizuki.github.io/zaiko/requirements/documents/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>9. 納品書生成 - 高島屋15店舗向け 追加発注・在庫照会システム</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../stylesheets/extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "9. \u7d0d\u54c1\u66f8\u751f\u6210";
+        var mkdocs_page_input_path = "requirements/documents.md";
+        var mkdocs_page_url = "/zaiko/requirements/documents/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> 高島屋15店舗向け 追加発注・在庫照会システム
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="ドキュメントを検索" aria-label="ドキュメントを検索" title="検索語句を入力してください" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="ナビゲーションメニュー">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">トップ</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../proposal/">📄 クライアント向け提案書</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">📋 詳細仕様書</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../overview/">1. 概要</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../system/">2. システム構成</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../users/">3. ユーザーと権限</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../workflow/">4. 業務フロー</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../features/">5. 機能要件</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../line-ui/">6. LINE UI設計</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../database/">7. データベース設計</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../excel-sync/">8. Excel在庫同期</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">9. 納品書生成</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#_2">概要</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_3">既存フォーマット（後日確定）</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_4">確認が必要な項目</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_5">想定される必須項目</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_6">生成タイミング</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_7">フロー</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_8">保存先</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#supabase-storage">Supabase Storage</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_9">例</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_10">バージョン管理</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_11">再生成が必要なケース</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_12">バージョン管理方法</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_13">管理画面での表示</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_14">実装方法（後日詳細確定）</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#1-reportlab">オプション1: reportlab</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#2-openpyxl-pdf">オプション2: openpyxl → PDF</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_15">単価・金額の扱い</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_16">単価表示が必要な場合</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_17">単価表示が不要な場合</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_18">エラー処理</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#pdf">PDF生成失敗時</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_19">リトライ</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#phase2">Phase2 改善計画</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_20">テンプレートエンジン化</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_21">多言語対応</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_22">電子署名</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../non-functional/">10. 非機能要件</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../phases/">11. フェーズ</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../todo/">12. 未確定事項</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="モバイルナビゲーションメニュー">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">高島屋15店舗向け 追加発注・在庫照会システム</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="ドキュメント"></a></li>
+          <li class="breadcrumb-item">📋 詳細仕様書</li>
+      <li class="breadcrumb-item active">9. 納品書生成</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/kikuchi-mizuki/zaiko/edit/master/docs/requirements/documents.md">kikuchi-mizuki/zaiko で編集</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="_1">納品書生成<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
+<h2 id="_2">概要<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<p>出荷依頼時に納品書PDFを自動生成し、Supabase Storageに保存する機能。</p>
+<hr />
+<h2 id="_3">既存フォーマット（後日確定）<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<h3 id="_4">確認が必要な項目<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> 既存のExcel/PDFテンプレートファイルの入手</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> 必須項目の確定</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> 単価・金額の表示要否</li>
+</ul>
+<h3 id="_5">想定される必須項目<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<p><strong>基本情報</strong>:
+- 納品日
+- 納品書番号（管理番号）
+- 発注元（高島屋○○店）
+- 発注先（貴社名）</p>
+<p><strong>商品情報</strong>:
+- 商品名
+- 数量（ケース数 / 個数）
+- 単価（要否は後日確定）
+- 金額（要否は後日確定）
+- 合計金額（要否は後日確定）</p>
+<p><strong>その他</strong>:
+- ロット番号
+- 賞味期限
+- 備考欄
+- 配送業者・追跡番号</p>
+<hr />
+<h2 id="_6">生成タイミング<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>requests.status = &#39;shipment_requested&#39;
+</code></pre></div>
+<p>になったタイミングで自動生成。</p>
+<h3 id="_7">フロー<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
+<pre class="mermaid"><code>flowchart LR
+    A[本部承認] --&gt; B[status: shipment_requested]
+    B --&gt; C[納品書PDF生成]
+    C --&gt; D[Supabase Storage保存]
+    D --&gt; E[documents テーブルに記録]
+    E --&gt; F[加工会社に通知]</code></pre>
+<hr />
+<h2 id="_8">保存先<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h2>
+<h3 id="supabase-storage">Supabase Storage<a class="headerlink" href="#supabase-storage" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Bucket</strong>: <code>documents</code></li>
+<li><strong>パス</strong>: <code>delivery_notes/{YYYY}/{MM}/{request_id}_v{version}.pdf</code></li>
+</ul>
+<h3 id="_9">例<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>documents/
+  └─ delivery_notes/
+      └─ 2026/
+          └─ 02/
+              ├─ abc123-def4-56gh-78ij-9klm01nop234_v1.pdf
+              ├─ abc123-def4-56gh-78ij-9klm01nop234_v2.pdf
+              └─ xyz789-uvw0-12ab-34cd-5efg67hij890_v1.pdf
+</code></pre></div>
+<hr />
+<h2 id="_10">バージョン管理<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h2>
+<h3 id="_11">再生成が必要なケース<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
+<ul>
+<li>数量修正</li>
+<li>商品変更</li>
+<li>配送先変更</li>
+<li>再送依頼</li>
+</ul>
+<h3 id="_12">バージョン管理方法<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1">-- 初回生成</span>
+<span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">documents</span><span class="w"> </span><span class="p">(</span>
+<span class="w">  </span><span class="n">request_id</span><span class="p">,</span><span class="w"> </span><span class="n">doc_type</span><span class="p">,</span><span class="w"> </span><span class="n">storage_path</span><span class="p">,</span><span class="w"> </span><span class="k">version</span><span class="p">,</span><span class="w"> </span><span class="n">is_latest</span>
+<span class="p">)</span><span class="w"> </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span>
+<span class="w">  </span><span class="s1">&#39;abc123...&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;delivery_note&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;delivery_notes/2026/02/abc123..._v1.pdf&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="k">true</span>
+<span class="p">);</span>
+
+<span class="c1">-- 再生成時</span>
+<span class="k">UPDATE</span><span class="w"> </span><span class="n">documents</span>
+<span class="k">SET</span><span class="w"> </span><span class="n">is_latest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">false</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">request_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;abc123...&#39;</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="n">is_latest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">true</span><span class="p">;</span>
+
+<span class="k">INSERT</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">documents</span><span class="w"> </span><span class="p">(</span>
+<span class="w">  </span><span class="n">request_id</span><span class="p">,</span><span class="w"> </span><span class="n">doc_type</span><span class="p">,</span><span class="w"> </span><span class="n">storage_path</span><span class="p">,</span><span class="w"> </span><span class="k">version</span><span class="p">,</span><span class="w"> </span><span class="n">is_latest</span>
+<span class="p">)</span><span class="w"> </span><span class="k">VALUES</span><span class="w"> </span><span class="p">(</span>
+<span class="w">  </span><span class="s1">&#39;abc123...&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;delivery_note&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;delivery_notes/2026/02/abc123..._v2.pdf&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="k">true</span>
+<span class="p">);</span>
+</code></pre></div>
+<h3 id="_13">管理画面での表示<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>納品書一覧
+├─ v2（最新）[ダウンロード]
+└─ v1       [ダウンロード]
+</code></pre></div>
+<hr />
+<h2 id="_14">実装方法（後日詳細確定）<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h2>
+<h3 id="1-reportlab">オプション1: reportlab<a class="headerlink" href="#1-reportlab" title="Permanent link">&para;</a></h3>
+<p>既存フォーマットがPDFの場合。</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">reportlab.pdfgen</span><span class="w"> </span><span class="kn">import</span> <span class="n">canvas</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">reportlab.lib.pagesizes</span><span class="w"> </span><span class="kn">import</span> <span class="n">A4</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_delivery_note</span><span class="p">(</span><span class="n">request_id</span><span class="p">):</span>
+    <span class="c1"># データ取得</span>
+    <span class="n">request</span> <span class="o">=</span> <span class="n">get_request_by_id</span><span class="p">(</span><span class="n">request_id</span><span class="p">)</span>
+    <span class="n">store</span> <span class="o">=</span> <span class="n">get_store_by_id</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">store_id</span><span class="p">)</span>
+    <span class="n">product</span> <span class="o">=</span> <span class="n">get_product_by_id</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">product_id</span><span class="p">)</span>
+
+    <span class="c1"># PDF生成</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;/tmp/</span><span class="si">{</span><span class="n">request_id</span><span class="si">}</span><span class="s2">_v1.pdf&quot;</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">canvas</span><span class="o">.</span><span class="n">Canvas</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">pagesize</span><span class="o">=</span><span class="n">A4</span><span class="p">)</span>
+
+    <span class="c1"># ヘッダー</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">drawString</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">800</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;納品書&quot;</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">drawString</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">780</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;納品日: </span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y年%m月</span><span class="si">%d</span><span class="s1">日&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># 店舗情報</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">drawString</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">750</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;納品先: </span><span class="si">{</span><span class="n">store</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># 商品情報</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">drawString</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">700</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;商品名: </span><span class="si">{</span><span class="n">product</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">drawString</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">680</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;数量: </span><span class="si">{</span><span class="n">request</span><span class="o">.</span><span class="n">qty_requested</span><span class="si">}</span><span class="s2">ケース&quot;</span><span class="p">)</span>
+
+    <span class="n">c</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+    <span class="c1"># Supabase Storageにアップロード</span>
+    <span class="n">upload_to_storage</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;delivery_notes/2026/02/</span><span class="si">{</span><span class="n">request_id</span><span class="si">}</span><span class="s2">_v1.pdf&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="2-openpyxl-pdf">オプション2: openpyxl → PDF<a class="headerlink" href="#2-openpyxl-pdf" title="Permanent link">&para;</a></h3>
+<p>既存フォーマットがExcelの場合。</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">openpyxl</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_workbook</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openpyxl.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_column_letter</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_delivery_note_from_template</span><span class="p">(</span><span class="n">request_id</span><span class="p">):</span>
+    <span class="c1"># テンプレート読み込み</span>
+    <span class="n">wb</span> <span class="o">=</span> <span class="n">load_workbook</span><span class="p">(</span><span class="s1">&#39;templates/delivery_note_template.xlsx&#39;</span><span class="p">)</span>
+    <span class="n">ws</span> <span class="o">=</span> <span class="n">wb</span><span class="o">.</span><span class="n">active</span>
+
+    <span class="c1"># データ取得</span>
+    <span class="n">request</span> <span class="o">=</span> <span class="n">get_request_by_id</span><span class="p">(</span><span class="n">request_id</span><span class="p">)</span>
+    <span class="n">store</span> <span class="o">=</span> <span class="n">get_store_by_id</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">store_id</span><span class="p">)</span>
+    <span class="n">product</span> <span class="o">=</span> <span class="n">get_product_by_id</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">product_id</span><span class="p">)</span>
+
+    <span class="c1"># データ埋め込み</span>
+    <span class="n">ws</span><span class="p">[</span><span class="s1">&#39;B5&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">store</span><span class="o">.</span><span class="n">name</span>  <span class="c1"># 納品先</span>
+    <span class="n">ws</span><span class="p">[</span><span class="s1">&#39;B10&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">product</span><span class="o">.</span><span class="n">name</span>  <span class="c1"># 商品名</span>
+    <span class="n">ws</span><span class="p">[</span><span class="s1">&#39;C10&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">qty_requested</span>  <span class="c1"># 数量</span>
+
+    <span class="c1"># 一時保存</span>
+    <span class="n">temp_xlsx</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;/tmp/</span><span class="si">{</span><span class="n">request_id</span><span class="si">}</span><span class="s2">_v1.xlsx&quot;</span>
+    <span class="n">wb</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">temp_xlsx</span><span class="p">)</span>
+
+    <span class="c1"># PDF変換（libreoffice や別ツール使用）</span>
+    <span class="n">convert_xlsx_to_pdf</span><span class="p">(</span><span class="n">temp_xlsx</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;/tmp/</span><span class="si">{</span><span class="n">request_id</span><span class="si">}</span><span class="s2">_v1.pdf&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Supabase Storageにアップロード</span>
+    <span class="n">upload_to_storage</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/tmp/</span><span class="si">{</span><span class="n">request_id</span><span class="si">}</span><span class="s2">_v1.pdf&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;delivery_notes/2026/02/</span><span class="si">{</span><span class="n">request_id</span><span class="si">}</span><span class="s2">_v1.pdf&quot;</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="_15">単価・金額の扱い<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h2>
+<h3 id="_16">単価表示が必要な場合<a class="headerlink" href="#_16" title="Permanent link">&para;</a></h3>
+<p><code>products</code> テーブルに追加：</p>
+<div class="highlight"><pre><span></span><code><span class="k">ALTER</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">products</span>
+<span class="k">ADD</span><span class="w"> </span><span class="k">COLUMN</span><span class="w"> </span><span class="n">unit_price</span><span class="w"> </span><span class="nb">NUMERIC</span><span class="p">;</span>
+</code></pre></div>
+<p>納品書に合計金額を記載：</p>
+<div class="highlight"><pre><span></span><code>商品名: 生チョコレート
+数量: 10ケース
+単価: ¥5,000
+合計: ¥50,000
+</code></pre></div>
+<h3 id="_17">単価表示が不要な場合<a class="headerlink" href="#_17" title="Permanent link">&para;</a></h3>
+<p>数量のみ記載（請求は別途）。</p>
+<hr />
+<h2 id="_18">エラー処理<a class="headerlink" href="#_18" title="Permanent link">&para;</a></h2>
+<h3 id="pdf">PDF生成失敗時<a class="headerlink" href="#pdf" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">try</span><span class="p">:</span>
+    <span class="n">generate_delivery_note</span><span class="p">(</span><span class="n">request_id</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="c1"># エラーログ記録</span>
+    <span class="n">update_request_error</span><span class="p">(</span><span class="n">request_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
+    <span class="c1"># 管理者に通知</span>
+    <span class="n">send_notification_to_admin</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;納品書PDF生成失敗</span><span class="se">\n</span><span class="s2">Request ID: </span><span class="si">{</span><span class="n">request_id</span><span class="si">}</span><span class="se">\n</span><span class="s2">エラー: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+</code></pre></div>
+<h3 id="_19">リトライ<a class="headerlink" href="#_19" title="Permanent link">&para;</a></h3>
+<ul>
+<li>管理画面で「再生成」ボタン</li>
+<li>手動でリトライ可能</li>
+</ul>
+<hr />
+<h2 id="phase2">Phase2 改善計画<a class="headerlink" href="#phase2" title="Permanent link">&para;</a></h2>
+<h3 id="_20">テンプレートエンジン化<a class="headerlink" href="#_20" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Jinja2 などでテンプレート管理</li>
+<li>帳票レイアウトの柔軟な変更</li>
+</ul>
+<h3 id="_21">多言語対応<a class="headerlink" href="#_21" title="Permanent link">&para;</a></h3>
+<ul>
+<li>海外店舗向けに英語版納品書</li>
+</ul>
+<h3 id="_22">電子署名<a class="headerlink" href="#_22" title="Permanent link">&para;</a></h3>
+<ul>
+<li>PDF に電子署名を付与</li>
+<li>改ざん防止</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="フッターナビゲーション">
+        <a href="../excel-sync/" class="btn btn-neutral float-left" title="8. Excel在庫同期"><span class="icon icon-circle-arrow-left"></span> 前へ</a>
+        <a href="../non-functional/" class="btn btn-neutral float-right" title="10. 非機能要件">次へ <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  <a href="https://readthedocs.org">Read the Docs</a> 提供の <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> を使って <a href="https://www.mkdocs.org/">MkDocs</a> でビルドされました。
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="バージョン">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/kikuchi-mizuki/zaiko" class="fa fa-code-fork" style="color: #fcfcfc"> kikuchi-mizuki/zaiko</a>
+        </span>
+    
+    
+      <span><a href="../excel-sync/" style="color: #fcfcfc">&laquo; 前へ</a></span>
+    
+    
+      <span><a href="../non-functional/" style="color: #fcfcfc">次へ &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

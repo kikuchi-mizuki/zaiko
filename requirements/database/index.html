@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="kikuchi-mizuki" /><link rel="canonical" href="https://kikuchi-mizuki.github.io/zaiko/requirements/database/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>7. データベース設計 - 高島屋15店舗向け 追加発注・在庫照会システム</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../stylesheets/extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "7. \u30c7\u30fc\u30bf\u30d9\u30fc\u30b9\u8a2d\u8a08";
+        var mkdocs_page_input_path = "requirements/database.md";
+        var mkdocs_page_url = "/zaiko/requirements/database/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> 高島屋15店舗向け 追加発注・在庫照会システム
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="ドキュメントを検索" aria-label="ドキュメントを検索" title="検索語句を入力してください" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="ナビゲーションメニュー">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">トップ</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../proposal/">📄 クライアント向け提案書</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">📋 詳細仕様書</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../overview/">1. 概要</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../system/">2. システム構成</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../users/">3. ユーザーと権限</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../workflow/">4. 業務フロー</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../features/">5. 機能要件</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../line-ui/">6. LINE UI設計</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">7. データベース設計</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#_2">マスタテーブル</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#stores">stores（店舗マスタ）</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#products">products（商品マスタ）</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_3">ユーザー管理</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#line_usersline">line_users（LINEユーザー）</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#invitation_codes">invitation_codes（招待コード）</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_4">在庫管理</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#inventory">inventory（在庫）</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#inventory_sync_log">inventory_sync_log（在庫同期ログ）</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_5">発注管理</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#requests">requests（追加発注リクエスト）</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#allocations">allocations（仮引当/確定引当）</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_8">出荷管理</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#shipments">shipments（出荷）</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#documents">documents（帳票）</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_9">システム設定</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#system_settings">system_settings（システム設定）</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#rlsrow-level-security">RLS（Row Level Security）</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_10">前提</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#rls">RLSポリシー例</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_11">インデックス</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_12">初期データ</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../excel-sync/">8. Excel在庫同期</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../documents/">9. 納品書生成</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../non-functional/">10. 非機能要件</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../phases/">11. フェーズ</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../todo/">12. 未確定事項</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="モバイルナビゲーションメニュー">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">高島屋15店舗向け 追加発注・在庫照会システム</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="ドキュメント"></a></li>
+          <li class="breadcrumb-item">📋 詳細仕様書</li>
+      <li class="breadcrumb-item active">7. データベース設計</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/kikuchi-mizuki/zaiko/edit/master/docs/requirements/database.md">kikuchi-mizuki/zaiko で編集</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="_1">データベース設計<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
+<p>全11テーブルで構成されます。</p>
+<h2 id="_2">マスタテーブル<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h3 id="stores">stores（店舗マスタ）<a class="headerlink" href="#stores" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">stores</span><span class="w"> </span><span class="p">(</span>
+<span class="w">  </span><span class="n">id</span><span class="w"> </span><span class="n">UUID</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">gen_random_uuid</span><span class="p">(),</span>
+<span class="w">  </span><span class="n">name</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">  </span><span class="c1">-- 例: 高島屋新宿店</span>
+<span class="w">  </span><span class="n">code</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">UNIQUE</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">  </span><span class="c1">-- 店舗コード</span>
+<span class="w">  </span><span class="n">is_active</span><span class="w"> </span><span class="nb">BOOLEAN</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="k">true</span><span class="p">,</span>
+<span class="w">  </span><span class="n">created_at</span><span class="w"> </span><span class="n">TIMESTAMPTZ</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">now</span><span class="p">(),</span>
+<span class="w">  </span><span class="n">updated_at</span><span class="w"> </span><span class="n">TIMESTAMPTZ</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">now</span><span class="p">()</span>
+<span class="p">);</span>
+</code></pre></div>
+<h3 id="products">products（商品マスタ）<a class="headerlink" href="#products" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">products</span><span class="w"> </span><span class="p">(</span>
+<span class="w">  </span><span class="n">id</span><span class="w"> </span><span class="n">UUID</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">gen_random_uuid</span><span class="p">(),</span>
+<span class="w">  </span><span class="n">name</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">  </span><span class="n">sku</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">UNIQUE</span><span class="p">,</span><span class="w">  </span><span class="c1">-- SKUコード（任意）</span>
+<span class="w">  </span><span class="n">case_size</span><span class="w"> </span><span class="nb">INT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">  </span><span class="c1">-- 1ケースあたり個数</span>
+<span class="w">  </span><span class="n">is_active</span><span class="w"> </span><span class="nb">BOOLEAN</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="k">true</span><span class="p">,</span>
+<span class="w">  </span><span class="n">created_at</span><span class="w"> </span><span class="n">TIMESTAMPTZ</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">now</span><span class="p">(),</span>
+<span class="w">  </span><span class="n">updated_at</span><span class="w"> </span><span class="n">TIMESTAMPTZ</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">now</span><span class="p">()</span>
+<span class="p">);</span>
+</code></pre></div>
+<h2 id="_3">ユーザー管理<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<h3 id="line_usersline">line_users（LINEユーザー）<a class="headerlink" href="#line_usersline" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">line_users</span><span class="w"> </span><span class="p">(</span>
+<span class="w">  </span><span class="n">id</span><span class="w"> </span><span class="n">UUID</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">gen_random_uuid</span><span class="p">(),</span>
+<span class="w">  </span><span class="n">line_user_id</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">UNIQUE</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">  </span><span class="c1">-- LINE User ID</span>
+<span class="w">  </span><span class="n">display_name</span><span class="w"> </span><span class="nb">TEXT</span><span class="p">,</span>
+<span class="w">  </span><span class="n">store_id</span><span class="w"> </span><span class="n">UUID</span><span class="w"> </span><span class="k">REFERENCES</span><span class="w"> </span><span class="n">stores</span><span class="p">(</span><span class="n">id</span><span class="p">),</span><span class="w">  </span><span class="c1">-- store_managerのみ必須</span>
+<span class="w">  </span><span class="k">role</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">  </span><span class="c1">-- &#39;store_manager&#39; | &#39;buyer&#39; | &#39;admin&#39;</span>
+<span class="w">  </span><span class="n">supabase_auth_user_id</span><span class="w"> </span><span class="n">UUID</span><span class="w"> </span><span class="k">REFERENCES</span><span class="w"> </span><span class="n">auth</span><span class="p">.</span><span class="n">users</span><span class="p">(</span><span class="n">id</span><span class="p">),</span><span class="w">  </span><span class="c1">-- 将来の紐付け用</span>
+<span class="w">  </span><span class="n">is_active</span><span class="w"> </span><span class="nb">BOOLEAN</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="k">true</span><span class="p">,</span>
+<span class="w">  </span><span class="n">created_at</span><span class="w"> </span><span class="n">TIMESTAMPTZ</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">now</span><span class="p">(),</span>
+<span class="w">  </span><span class="n">updated_at</span><span class="w"> </span><span class="n">TIMESTAMPTZ</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">now</span><span class="p">()</span>
+<span class="p">);</span>
+</code></pre></div>
+<p><strong>制約</strong>:
+- <code>store_id</code> は <code>role='store_manager'</code> の場合のみ必須
+- <code>role</code> は ENUM 型を推奨</p>
+<h3 id="invitation_codes">invitation_codes（招待コード）<a class="headerlink" href="#invitation_codes" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">invitation_codes</span><span class="w"> </span><span class="p">(</span>
+<span class="w">  </span><span class="n">id</span><span class="w"> </span><span class="n">UUID</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">gen_random_uuid</span><span class="p">(),</span>
+<span class="w">  </span><span class="n">code</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">UNIQUE</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">  </span><span class="c1">-- 招待コード</span>
+<span class="w">  </span><span class="k">role</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">  </span><span class="c1">-- &#39;buyer&#39; | &#39;admin&#39;</span>
+<span class="w">  </span><span class="n">created_by</span><span class="w"> </span><span class="n">UUID</span><span class="w"> </span><span class="k">REFERENCES</span><span class="w"> </span><span class="n">auth</span><span class="p">.</span><span class="n">users</span><span class="p">(</span><span class="n">id</span><span class="p">),</span>
+<span class="w">  </span><span class="n">used_by_line_user_id</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">REFERENCES</span><span class="w"> </span><span class="n">line_users</span><span class="p">(</span><span class="n">line_user_id</span><span class="p">),</span>
+<span class="w">  </span><span class="n">used_at</span><span class="w"> </span><span class="n">TIMESTAMPTZ</span><span class="p">,</span>
+<span class="w">  </span><span class="n">expires_at</span><span class="w"> </span><span class="n">TIMESTAMPTZ</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">  </span><span class="n">is_active</span><span class="w"> </span><span class="nb">BOOLEAN</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="k">true</span><span class="p">,</span>
+<span class="w">  </span><span class="n">created_at</span><span class="w"> </span><span class="n">TIMESTAMPTZ</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">now</span><span class="p">()</span>
+<span class="p">);</span>
+</code></pre></div>
+<h2 id="_4">在庫管理<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<h3 id="inventory">inventory（在庫）<a class="headerlink" href="#inventory" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">inventory</span><span class="w"> </span><span class="p">(</span>
+<span class="w">  </span><span class="n">id</span><span class="w"> </span><span class="n">UUID</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">gen_random_uuid</span><span class="p">(),</span>
+<span class="w">  </span><span class="n">product_id</span><span class="w"> </span><span class="n">UUID</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">REFERENCES</span><span class="w"> </span><span class="n">products</span><span class="p">(</span><span class="n">id</span><span class="p">),</span>
+<span class="w">  </span><span class="n">lot_no</span><span class="w"> </span><span class="nb">TEXT</span><span class="p">,</span>
+<span class="w">  </span><span class="n">expiry_date</span><span class="w"> </span><span class="nb">DATE</span><span class="p">,</span>
+<span class="w">  </span><span class="n">qty_cases</span><span class="w"> </span><span class="nb">NUMERIC</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">  </span><span class="n">status</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">  </span><span class="c1">-- &#39;confirmed&#39; | &#39;provisional&#39;（Phase1では全てprovisional）</span>
+<span class="w">  </span><span class="n">updated_at</span><span class="w"> </span><span class="n">TIMESTAMPTZ</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">now</span><span class="p">(),</span>
+<span class="w">  </span><span class="k">source</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">  </span><span class="c1">-- &#39;excel_sync&#39; | &#39;admin&#39; | &#39;factory&#39;</span>
+<span class="w">  </span><span class="n">note</span><span class="w"> </span><span class="nb">TEXT</span>
+<span class="p">);</span>
+</code></pre></div>
+<p><strong>Phase1運用</strong>:
+- 全て <code>status='provisional'</code> で運用
+- <code>source='excel_sync'</code> が基本</p>
+<h3 id="inventory_sync_log">inventory_sync_log（在庫同期ログ）<a class="headerlink" href="#inventory_sync_log" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">inventory_sync_log</span><span class="w"> </span><span class="p">(</span>
+<span class="w">  </span><span class="n">id</span><span class="w"> </span><span class="n">UUID</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">gen_random_uuid</span><span class="p">(),</span>
+<span class="w">  </span><span class="n">sync_at</span><span class="w"> </span><span class="n">TIMESTAMPTZ</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">now</span><span class="p">(),</span>
+<span class="w">  </span><span class="n">file_last_modified</span><span class="w"> </span><span class="n">TIMESTAMPTZ</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">  </span><span class="c1">-- Excelファイルの更新タイムスタンプ</span>
+<span class="w">  </span><span class="n">file_path</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">  </span><span class="c1">-- Storage内のパス</span>
+<span class="w">  </span><span class="n">records_imported</span><span class="w"> </span><span class="nb">INT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">  </span><span class="c1">-- 取り込んだ行数</span>
+<span class="w">  </span><span class="n">status</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">  </span><span class="c1">-- &#39;success&#39; | &#39;warning&#39; | &#39;failed&#39;</span>
+<span class="w">  </span><span class="n">error_message</span><span class="w"> </span><span class="nb">TEXT</span>
+<span class="p">);</span>
+</code></pre></div>
+<h2 id="_5">発注管理<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<h3 id="requests">requests（追加発注リクエスト）<a class="headerlink" href="#requests" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">requests</span><span class="w"> </span><span class="p">(</span>
+<span class="w">  </span><span class="n">id</span><span class="w"> </span><span class="n">UUID</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">gen_random_uuid</span><span class="p">(),</span>
+<span class="w">  </span><span class="n">store_id</span><span class="w"> </span><span class="n">UUID</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">REFERENCES</span><span class="w"> </span><span class="n">stores</span><span class="p">(</span><span class="n">id</span><span class="p">),</span>
+<span class="w">  </span><span class="n">product_id</span><span class="w"> </span><span class="n">UUID</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">REFERENCES</span><span class="w"> </span><span class="n">products</span><span class="p">(</span><span class="n">id</span><span class="p">),</span>
+<span class="w">  </span><span class="n">qty_requested</span><span class="w"> </span><span class="nb">NUMERIC</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">  </span><span class="n">desired_date</span><span class="w"> </span><span class="nb">DATE</span><span class="p">,</span><span class="w">  </span><span class="c1">-- 希望納品日（参考情報）</span>
+<span class="w">  </span><span class="n">status</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">  </span><span class="c1">-- 下記のステータス一覧参照</span>
+<span class="w">  </span><span class="n">parent_request_id</span><span class="w"> </span><span class="n">UUID</span><span class="w"> </span><span class="k">REFERENCES</span><span class="w"> </span><span class="n">requests</span><span class="p">(</span><span class="n">id</span><span class="p">),</span><span class="w">  </span><span class="c1">-- 一部承認時の分割元</span>
+<span class="w">  </span><span class="n">approved_qty</span><span class="w"> </span><span class="nb">NUMERIC</span><span class="p">,</span><span class="w">  </span><span class="c1">-- 一部承認時の実際の承認数量</span>
+<span class="w">  </span><span class="n">rejected_reason</span><span class="w"> </span><span class="nb">TEXT</span><span class="p">,</span><span class="w">  </span><span class="c1">-- 差戻し理由</span>
+<span class="w">  </span><span class="n">error_message</span><span class="w"> </span><span class="nb">TEXT</span><span class="p">,</span><span class="w">  </span><span class="c1">-- エラー内容</span>
+<span class="w">  </span><span class="n">error_at</span><span class="w"> </span><span class="n">TIMESTAMPTZ</span><span class="p">,</span>
+<span class="w">  </span><span class="n">approved_by_line_user_id</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">REFERENCES</span><span class="w"> </span><span class="n">line_users</span><span class="p">(</span><span class="n">line_user_id</span><span class="p">),</span><span class="w">  </span><span class="c1">-- LINE経由の承認</span>
+<span class="w">  </span><span class="n">approved_by_admin_id</span><span class="w"> </span><span class="n">UUID</span><span class="w"> </span><span class="k">REFERENCES</span><span class="w"> </span><span class="n">auth</span><span class="p">.</span><span class="n">users</span><span class="p">(</span><span class="n">id</span><span class="p">),</span><span class="w">  </span><span class="c1">-- 管理画面経由の承認</span>
+<span class="w">  </span><span class="n">approved_at</span><span class="w"> </span><span class="n">TIMESTAMPTZ</span><span class="p">,</span>
+<span class="w">  </span><span class="n">created_by_line_user_id</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">REFERENCES</span><span class="w"> </span><span class="n">line_users</span><span class="p">(</span><span class="n">line_user_id</span><span class="p">),</span>
+<span class="w">  </span><span class="n">created_at</span><span class="w"> </span><span class="n">TIMESTAMPTZ</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">now</span><span class="p">(),</span>
+<span class="w">  </span><span class="n">updated_at</span><span class="w"> </span><span class="n">TIMESTAMPTZ</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">now</span><span class="p">()</span>
+<span class="p">);</span>
+</code></pre></div>
+<h4 id="_6">ステータス一覧<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>ステータス</th>
+<th>説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pending_approval</code></td>
+<td>店舗が依頼→本部承認待ち</td>
+</tr>
+<tr>
+<td><code>approved</code></td>
+<td>本部承認済み</td>
+</tr>
+<tr>
+<td><code>allocated_hold</code></td>
+<td>仮引当完了（全量）</td>
+</tr>
+<tr>
+<td><code>partially_confirmed</code></td>
+<td>一部だけ確定引当</td>
+</tr>
+<tr>
+<td><code>confirmed</code></td>
+<td>全量確定引当</td>
+</tr>
+<tr>
+<td><code>shipment_requested</code></td>
+<td>出荷依頼済み</td>
+</tr>
+<tr>
+<td><code>partially_shipped</code></td>
+<td>一部出荷完了</td>
+</tr>
+<tr>
+<td><code>shipped</code></td>
+<td>全量出荷完了</td>
+</tr>
+<tr>
+<td><code>cancelled</code></td>
+<td>キャンセル</td>
+</tr>
+<tr>
+<td><code>rejected</code></td>
+<td>差戻し</td>
+</tr>
+<tr>
+<td><code>pending_inventory</code></td>
+<td>在庫待ち（分割された保留分）</td>
+</tr>
+</tbody>
+</table>
+<h4 id="_7">ステータス遷移図<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h4>
+<pre class="mermaid"><code>graph TD
+    A[pending_approval] --&gt; B[approved 全量承認]
+    A --&gt; C[approved 一部承認]
+    A --&gt; D[rejected]
+    A --&gt; E[cancelled]
+
+    B --&gt; F[allocated_hold]
+    C --&gt; F
+    C --&gt; G[pending_inventory 子リクエスト作成]
+
+    F --&gt; H[partially_confirmed]
+    F --&gt; I[confirmed]
+
+    H --&gt; J[shipment_requested]
+    I --&gt; J
+
+    J --&gt; K[partially_shipped]
+    J --&gt; L[shipped]
+
+    D --&gt; M[新 pending_approval 修正再提出]
+
+    G --&gt; B
+    G --&gt; E</code></pre>
+<h3 id="allocations">allocations（仮引当/確定引当）<a class="headerlink" href="#allocations" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">allocations</span><span class="w"> </span><span class="p">(</span>
+<span class="w">  </span><span class="n">id</span><span class="w"> </span><span class="n">UUID</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">gen_random_uuid</span><span class="p">(),</span>
+<span class="w">  </span><span class="n">request_id</span><span class="w"> </span><span class="n">UUID</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">REFERENCES</span><span class="w"> </span><span class="n">requests</span><span class="p">(</span><span class="n">id</span><span class="p">),</span>
+<span class="w">  </span><span class="n">inventory_id</span><span class="w"> </span><span class="n">UUID</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">REFERENCES</span><span class="w"> </span><span class="n">inventory</span><span class="p">(</span><span class="n">id</span><span class="p">),</span>
+<span class="w">  </span><span class="n">qty_allocated</span><span class="w"> </span><span class="nb">NUMERIC</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">  </span><span class="k">type</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">  </span><span class="c1">-- &#39;hold&#39; | &#39;confirmed&#39;</span>
+<span class="w">  </span><span class="n">status</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">  </span><span class="c1">-- &#39;active&#39; | &#39;expired&#39; | &#39;released&#39; | &#39;shipped&#39;</span>
+<span class="w">  </span><span class="n">expires_at</span><span class="w"> </span><span class="n">TIMESTAMPTZ</span><span class="p">,</span><span class="w">  </span><span class="c1">-- holdのみ、作成時刻 + 24時間</span>
+<span class="w">  </span><span class="n">confirmed_at</span><span class="w"> </span><span class="n">TIMESTAMPTZ</span><span class="p">,</span>
+<span class="w">  </span><span class="n">created_at</span><span class="w"> </span><span class="n">TIMESTAMPTZ</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">now</span><span class="p">(),</span>
+<span class="w">  </span><span class="n">updated_at</span><span class="w"> </span><span class="n">TIMESTAMPTZ</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">now</span><span class="p">()</span>
+<span class="p">);</span>
+</code></pre></div>
+<p><strong>運用ルール</strong>:</p>
+<ul>
+<li>承認時: <code>type='hold'</code>, <code>status='active'</code>, <code>expires_at=+24時間</code></li>
+<li>期限切れ時: <code>status='active'</code> のまま、警告のみ</li>
+<li>手動解放: <code>status='released'</code></li>
+<li>確定: <code>type='confirmed'</code>, <code>confirmed_at=now()</code></li>
+<li>出荷完了: <code>status='shipped'</code></li>
+</ul>
+<h2 id="_8">出荷管理<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h2>
+<h3 id="shipments">shipments（出荷）<a class="headerlink" href="#shipments" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">shipments</span><span class="w"> </span><span class="p">(</span>
+<span class="w">  </span><span class="n">id</span><span class="w"> </span><span class="n">UUID</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">gen_random_uuid</span><span class="p">(),</span>
+<span class="w">  </span><span class="n">request_id</span><span class="w"> </span><span class="n">UUID</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">REFERENCES</span><span class="w"> </span><span class="n">requests</span><span class="p">(</span><span class="n">id</span><span class="p">),</span>
+<span class="w">  </span><span class="n">ship_to_store_id</span><span class="w"> </span><span class="n">UUID</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">REFERENCES</span><span class="w"> </span><span class="n">stores</span><span class="p">(</span><span class="n">id</span><span class="p">),</span>
+<span class="w">  </span><span class="n">tracking_number</span><span class="w"> </span><span class="nb">TEXT</span><span class="p">,</span>
+<span class="w">  </span><span class="n">status</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">  </span><span class="c1">-- &#39;requested&#39; | &#39;packed&#39; | &#39;shipped&#39; | &#39;delivered&#39; | &#39;cancelled&#39;</span>
+<span class="w">  </span><span class="n">shipped_at</span><span class="w"> </span><span class="n">TIMESTAMPTZ</span><span class="p">,</span>
+<span class="w">  </span><span class="n">delivered_at</span><span class="w"> </span><span class="n">TIMESTAMPTZ</span><span class="p">,</span>
+<span class="w">  </span><span class="n">note</span><span class="w"> </span><span class="nb">TEXT</span><span class="p">,</span><span class="w">  </span><span class="c1">-- 納品日を手動記録する場合など</span>
+<span class="w">  </span><span class="n">created_at</span><span class="w"> </span><span class="n">TIMESTAMPTZ</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">now</span><span class="p">(),</span>
+<span class="w">  </span><span class="n">updated_at</span><span class="w"> </span><span class="n">TIMESTAMPTZ</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">now</span><span class="p">()</span>
+<span class="p">);</span>
+</code></pre></div>
+<h3 id="documents">documents（帳票）<a class="headerlink" href="#documents" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">documents</span><span class="w"> </span><span class="p">(</span>
+<span class="w">  </span><span class="n">id</span><span class="w"> </span><span class="n">UUID</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">gen_random_uuid</span><span class="p">(),</span>
+<span class="w">  </span><span class="n">request_id</span><span class="w"> </span><span class="n">UUID</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">REFERENCES</span><span class="w"> </span><span class="n">requests</span><span class="p">(</span><span class="n">id</span><span class="p">),</span>
+<span class="w">  </span><span class="n">doc_type</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">  </span><span class="c1">-- &#39;delivery_note&#39;</span>
+<span class="w">  </span><span class="n">storage_bucket</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">  </span><span class="c1">-- &#39;documents&#39;</span>
+<span class="w">  </span><span class="n">storage_path</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">  </span><span class="c1">-- 例: delivery_notes/2026/02/request_id_v1.pdf</span>
+<span class="w">  </span><span class="k">version</span><span class="w"> </span><span class="nb">INT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">  </span><span class="c1">-- 1, 2, 3...</span>
+<span class="w">  </span><span class="n">is_latest</span><span class="w"> </span><span class="nb">BOOLEAN</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="k">true</span><span class="p">,</span><span class="w">  </span><span class="c1">-- 最新版フラグ</span>
+<span class="w">  </span><span class="n">created_at</span><span class="w"> </span><span class="n">TIMESTAMPTZ</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">now</span><span class="p">(),</span>
+<span class="w">  </span><span class="n">created_by</span><span class="w"> </span><span class="n">UUID</span><span class="w"> </span><span class="k">REFERENCES</span><span class="w"> </span><span class="n">auth</span><span class="p">.</span><span class="n">users</span><span class="p">(</span><span class="n">id</span><span class="p">)</span>
+<span class="p">);</span>
+</code></pre></div>
+<h2 id="_9">システム設定<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
+<h3 id="system_settings">system_settings（システム設定）<a class="headerlink" href="#system_settings" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">system_settings</span><span class="w"> </span><span class="p">(</span>
+<span class="w">  </span><span class="n">id</span><span class="w"> </span><span class="n">UUID</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">gen_random_uuid</span><span class="p">(),</span>
+<span class="w">  </span><span class="k">key</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">UNIQUE</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">  </span><span class="n">value</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">  </span><span class="n">description</span><span class="w"> </span><span class="nb">TEXT</span><span class="p">,</span>
+<span class="w">  </span><span class="n">updated_at</span><span class="w"> </span><span class="n">TIMESTAMPTZ</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="n">now</span><span class="p">()</span>
+<span class="p">);</span>
+</code></pre></div>
+<p><strong>設定例</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>key</th>
+<th>value</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>admin_notification_line_group_id</code></td>
+<td><code>U1234...</code></td>
+<td>管理者通知先LINEグループID</td>
+</tr>
+<tr>
+<td><code>inventory_storage_bucket</code></td>
+<td><code>inventory</code></td>
+<td>在庫Excel保存先bucket</td>
+</tr>
+<tr>
+<td><code>excel_staleness_warning_hours</code></td>
+<td><code>2</code></td>
+<td>在庫情報の古さ警告閾値</td>
+</tr>
+<tr>
+<td><code>allocation_hold_hours</code></td>
+<td><code>24</code></td>
+<td>仮引当期限</td>
+</tr>
+</tbody>
+</table>
+<h2 id="rlsrow-level-security">RLS（Row Level Security）<a class="headerlink" href="#rlsrow-level-security" title="Permanent link">&para;</a></h2>
+<h3 id="_10">前提<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>LINEボット</strong>: service role で全件アクセス（RLSバイパス）</li>
+<li><strong>管理画面</strong>: Supabase Auth + RLS で制御</li>
+</ul>
+<h3 id="rls">RLSポリシー例<a class="headerlink" href="#rls" title="Permanent link">&para;</a></h3>
+<h4 id="requests_1">requests テーブル<a class="headerlink" href="#requests_1" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c1">-- 店舗マネージャー: 自店舗のみ閲覧</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="n">POLICY</span><span class="w"> </span><span class="ss">&quot;store_manager_select_own&quot;</span>
+<span class="w">  </span><span class="k">ON</span><span class="w"> </span><span class="n">requests</span><span class="w"> </span><span class="k">FOR</span><span class="w"> </span><span class="k">SELECT</span>
+<span class="w">  </span><span class="k">USING</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="k">EXISTS</span><span class="w"> </span><span class="p">(</span>
+<span class="w">      </span><span class="k">SELECT</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">line_users</span>
+<span class="w">      </span><span class="k">WHERE</span><span class="w"> </span><span class="n">line_users</span><span class="p">.</span><span class="n">supabase_auth_user_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">auth</span><span class="p">.</span><span class="n">uid</span><span class="p">()</span>
+<span class="w">        </span><span class="k">AND</span><span class="w"> </span><span class="n">line_users</span><span class="p">.</span><span class="k">role</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;store_manager&#39;</span>
+<span class="w">        </span><span class="k">AND</span><span class="w"> </span><span class="n">requests</span><span class="p">.</span><span class="n">store_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">line_users</span><span class="p">.</span><span class="n">store_id</span>
+<span class="w">    </span><span class="p">)</span>
+<span class="w">  </span><span class="p">);</span>
+
+<span class="c1">-- 本部バイヤー・管理者: 全件閲覧</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="n">POLICY</span><span class="w"> </span><span class="ss">&quot;buyer_admin_select_all&quot;</span>
+<span class="w">  </span><span class="k">ON</span><span class="w"> </span><span class="n">requests</span><span class="w"> </span><span class="k">FOR</span><span class="w"> </span><span class="k">SELECT</span>
+<span class="w">  </span><span class="k">USING</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="k">EXISTS</span><span class="w"> </span><span class="p">(</span>
+<span class="w">      </span><span class="k">SELECT</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">line_users</span>
+<span class="w">      </span><span class="k">WHERE</span><span class="w"> </span><span class="n">line_users</span><span class="p">.</span><span class="n">supabase_auth_user_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">auth</span><span class="p">.</span><span class="n">uid</span><span class="p">()</span>
+<span class="w">        </span><span class="k">AND</span><span class="w"> </span><span class="n">line_users</span><span class="p">.</span><span class="k">role</span><span class="w"> </span><span class="k">IN</span><span class="w"> </span><span class="p">(</span><span class="s1">&#39;buyer&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;admin&#39;</span><span class="p">)</span>
+<span class="w">    </span><span class="p">)</span>
+<span class="w">  </span><span class="p">);</span>
+</code></pre></div>
+<h4 id="inventory_1">inventory テーブル<a class="headerlink" href="#inventory_1" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c1">-- 本部バイヤー・管理者のみ閲覧可</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="n">POLICY</span><span class="w"> </span><span class="ss">&quot;buyer_admin_select_inventory&quot;</span>
+<span class="w">  </span><span class="k">ON</span><span class="w"> </span><span class="n">inventory</span><span class="w"> </span><span class="k">FOR</span><span class="w"> </span><span class="k">SELECT</span>
+<span class="w">  </span><span class="k">USING</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="k">EXISTS</span><span class="w"> </span><span class="p">(</span>
+<span class="w">      </span><span class="k">SELECT</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">line_users</span>
+<span class="w">      </span><span class="k">WHERE</span><span class="w"> </span><span class="n">line_users</span><span class="p">.</span><span class="n">supabase_auth_user_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">auth</span><span class="p">.</span><span class="n">uid</span><span class="p">()</span>
+<span class="w">        </span><span class="k">AND</span><span class="w"> </span><span class="n">line_users</span><span class="p">.</span><span class="k">role</span><span class="w"> </span><span class="k">IN</span><span class="w"> </span><span class="p">(</span><span class="s1">&#39;buyer&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;admin&#39;</span><span class="p">)</span>
+<span class="w">    </span><span class="p">)</span>
+<span class="w">  </span><span class="p">);</span>
+</code></pre></div>
+<h2 id="_11">インデックス<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h2>
+<p>パフォーマンス最適化のため、以下のインデックスを作成：</p>
+<div class="highlight"><pre><span></span><code><span class="c1">-- requests</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_requests_status</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">requests</span><span class="p">(</span><span class="n">status</span><span class="p">);</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_requests_store_id</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">requests</span><span class="p">(</span><span class="n">store_id</span><span class="p">);</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_requests_created_at</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">requests</span><span class="p">(</span><span class="n">created_at</span><span class="p">);</span>
+
+<span class="c1">-- allocations</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_allocations_request_id</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">allocations</span><span class="p">(</span><span class="n">request_id</span><span class="p">);</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_allocations_expires_at</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">allocations</span><span class="p">(</span><span class="n">expires_at</span><span class="p">)</span><span class="w"> </span><span class="k">WHERE</span><span class="w"> </span><span class="k">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;hold&#39;</span><span class="p">;</span>
+
+<span class="c1">-- inventory</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_inventory_product_id</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">inventory</span><span class="p">(</span><span class="n">product_id</span><span class="p">);</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="k">INDEX</span><span class="w"> </span><span class="n">idx_inventory_status</span><span class="w"> </span><span class="k">ON</span><span class="w"> </span><span class="n">inventory</span><span class="p">(</span><span class="n">status</span><span class="p">);</span>
+</code></pre></div>
+<h2 id="_12">初期データ<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h2>
+<p>Phase1開始前に以下のマスタデータ投入が必要：</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> stores（15店舗）</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> products（商品一覧）</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> system_settings（基本設定）</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="フッターナビゲーション">
+        <a href="../line-ui/" class="btn btn-neutral float-left" title="6. LINE UI設計"><span class="icon icon-circle-arrow-left"></span> 前へ</a>
+        <a href="../excel-sync/" class="btn btn-neutral float-right" title="8. Excel在庫同期">次へ <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  <a href="https://readthedocs.org">Read the Docs</a> 提供の <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> を使って <a href="https://www.mkdocs.org/">MkDocs</a> でビルドされました。
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="バージョン">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/kikuchi-mizuki/zaiko" class="fa fa-code-fork" style="color: #fcfcfc"> kikuchi-mizuki/zaiko</a>
+        </span>
+    
+    
+      <span><a href="../line-ui/" style="color: #fcfcfc">&laquo; 前へ</a></span>
+    
+    
+      <span><a href="../excel-sync/" style="color: #fcfcfc">次へ &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

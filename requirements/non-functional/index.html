@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="kikuchi-mizuki" /><link rel="canonical" href="https://kikuchi-mizuki.github.io/zaiko/requirements/non-functional/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>10. 非機能要件 - 高島屋15店舗向け 追加発注・在庫照会システム</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../stylesheets/extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "10. \u975e\u6a5f\u80fd\u8981\u4ef6";
+        var mkdocs_page_input_path = "requirements/non-functional.md";
+        var mkdocs_page_url = "/zaiko/requirements/non-functional/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> 高島屋15店舗向け 追加発注・在庫照会システム
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="ドキュメントを検索" aria-label="ドキュメントを検索" title="検索語句を入力してください" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="ナビゲーションメニュー">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">トップ</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../proposal/">📄 クライアント向け提案書</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">📋 詳細仕様書</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../overview/">1. 概要</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../system/">2. システム構成</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../users/">3. ユーザーと権限</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../workflow/">4. 業務フロー</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../features/">5. 機能要件</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../line-ui/">6. LINE UI設計</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../database/">7. データベース設計</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../excel-sync/">8. Excel在庫同期</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../documents/">9. 納品書生成</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">10. 非機能要件</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#_2">監査ログ</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_3">承認・差戻・取消の記録</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_4">在庫同期履歴</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_5">納品書生成履歴</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_6">エラー通知</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_7">通知先</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_8">通知対象</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_9">記録方法</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_10">バックアップ</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#supabase">Supabase標準バックアップ</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#export">定期export（要検討）</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_11">同時アクセス</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_12">要件</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_13">対策</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_14">パフォーマンス</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_15">目標</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_16">最適化施策</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_17">セキュリティ</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_18">認証</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_19">認可</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_20">データ暗号化</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_21">脆弱性対策</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_22">可用性</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_23">目標</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#supabase-sla">Supabase のSLA</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_24">監視</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_25">スケーラビリティ</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#phase1mvp">Phase1（MVP）</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#phase2">Phase2（拡張）</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_26">スケールアップ施策</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#_27">保守性</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#_28">ログ</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_29">ドキュメント</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_30">コード品質</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../phases/">11. フェーズ</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../todo/">12. 未確定事項</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="モバイルナビゲーションメニュー">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">高島屋15店舗向け 追加発注・在庫照会システム</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="ドキュメント"></a></li>
+          <li class="breadcrumb-item">📋 詳細仕様書</li>
+      <li class="breadcrumb-item active">10. 非機能要件</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/kikuchi-mizuki/zaiko/edit/master/docs/requirements/non-functional.md">kikuchi-mizuki/zaiko で編集</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="_1">非機能要件<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h1>
+<h2 id="_2">監査ログ<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h3 id="_3">承認・差戻・取消の記録<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<p><code>requests</code> テーブルで管理：</p>
+<div class="highlight"><pre><span></span><code><span class="c1">-- 誰が承認したか</span>
+<span class="n">approved_by_line_user_id</span><span class="w">  </span><span class="c1">-- LINE経由</span>
+<span class="n">approved_by_admin_id</span><span class="w">      </span><span class="c1">-- 管理画面経由</span>
+<span class="n">approved_at</span><span class="w">               </span><span class="c1">-- 承認日時</span>
+
+<span class="c1">-- 差戻し理由</span>
+<span class="n">rejected_reason</span><span class="w">           </span><span class="c1">-- 差戻し理由</span>
+</code></pre></div>
+<h3 id="_4">在庫同期履歴<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<p><code>inventory_sync_log</code> テーブルで管理：</p>
+<ul>
+<li>同期実行時刻</li>
+<li>ファイル更新タイムスタンプ</li>
+<li>取り込んだ行数</li>
+<li>成功/失敗ステータス</li>
+<li>エラーメッセージ</li>
+</ul>
+<h3 id="_5">納品書生成履歴<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<p><code>documents</code> テーブルで管理：</p>
+<ul>
+<li>生成日時</li>
+<li>バージョン</li>
+<li>生成者</li>
+<li>ストレージパス</li>
+</ul>
+<hr />
+<h2 id="_6">エラー通知<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<h3 id="_7">通知先<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
+<p>管理者LINEグループ</p>
+<h3 id="_8">通知対象<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Excel同期失敗</strong></li>
+<li>ファイル読み込みエラー</li>
+<li>商品名照合エラー</li>
+<li>
+<p>データ形式エラー</p>
+</li>
+<li>
+<p><strong>PDF生成失敗</strong></p>
+</li>
+<li>テンプレート読み込みエラー</li>
+<li>データ不足エラー</li>
+<li>
+<p>ストレージ保存エラー</p>
+</li>
+<li>
+<p><strong>在庫引当失敗</strong></p>
+</li>
+<li>在庫不足エラー</li>
+<li>トランザクションエラー</li>
+</ol>
+<h3 id="_9">記録方法<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
+<p><code>requests.error_message</code> と <code>error_at</code> で記録：</p>
+<div class="highlight"><pre><span></span><code><span class="k">UPDATE</span><span class="w"> </span><span class="n">requests</span>
+<span class="k">SET</span><span class="w"> </span><span class="n">error_message</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;在庫引当失敗: 在庫不足&#39;</span><span class="p">,</span>
+<span class="w">    </span><span class="n">error_at</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">now</span><span class="p">()</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;abc123...&#39;</span><span class="p">;</span>
+</code></pre></div>
+<hr />
+<h2 id="_10">バックアップ<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h2>
+<h3 id="supabase">Supabase標準バックアップ<a class="headerlink" href="#supabase" title="Permanent link">&para;</a></h3>
+<ul>
+<li>自動バックアップ: 日次</li>
+<li>保持期間: 7日間（Proプラン）</li>
+<li>ポイントインタイムリカバリ: 対応</li>
+</ul>
+<h3 id="export">定期export（要検討）<a class="headerlink" href="#export" title="Permanent link">&para;</a></h3>
+<ul>
+<li>CSV/JSONエクスポート</li>
+<li>S3などの外部ストレージに保存</li>
+<li>頻度: 週次</li>
+</ul>
+<hr />
+<h2 id="_11">同時アクセス<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h2>
+<h3 id="_12">要件<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
+<ul>
+<li>繁忙期でもLINE問い合わせが詰まらない</li>
+<li>APIは軽量に設計</li>
+</ul>
+<h3 id="_13">対策<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>在庫照会の高速化</strong></li>
+<li>インデックス最適化</li>
+<li>
+<p>キャッシュ活用（Redis検討）</p>
+</li>
+<li>
+<p><strong>同一在庫への同時引当</strong></p>
+</li>
+<li>トランザクション制御</li>
+<li>排他ロック</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="c1"># 在庫引当時のトランザクション例</span>
+<span class="nd">@transaction</span><span class="o">.</span><span class="n">atomic</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">allocate_inventory</span><span class="p">(</span><span class="n">request_id</span><span class="p">,</span> <span class="n">inventory_id</span><span class="p">,</span> <span class="n">qty</span><span class="p">):</span>
+    <span class="c1"># 排他ロック</span>
+    <span class="n">inventory</span> <span class="o">=</span> <span class="n">Inventory</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">select_for_update</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">inventory_id</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">inventory</span><span class="o">.</span><span class="n">qty_cases</span> <span class="o">&lt;</span> <span class="n">qty</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">InsufficientInventoryError</span><span class="p">()</span>
+
+    <span class="c1"># 在庫減算</span>
+    <span class="n">inventory</span><span class="o">.</span><span class="n">qty_cases</span> <span class="o">-=</span> <span class="n">qty</span>
+    <span class="n">inventory</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+    <span class="c1"># allocation 作成</span>
+    <span class="n">Allocation</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+        <span class="n">request_id</span><span class="o">=</span><span class="n">request_id</span><span class="p">,</span>
+        <span class="n">inventory_id</span><span class="o">=</span><span class="n">inventory_id</span><span class="p">,</span>
+        <span class="n">qty_allocated</span><span class="o">=</span><span class="n">qty</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;hold&#39;</span><span class="p">,</span>
+        <span class="n">status</span><span class="o">=</span><span class="s1">&#39;active&#39;</span><span class="p">,</span>
+        <span class="n">expires_at</span><span class="o">=</span><span class="n">now</span><span class="p">()</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
+    <span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="_14">パフォーマンス<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h2>
+<h3 id="_15">目標<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>目標レスポンス時間</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>在庫照会</td>
+<td>3秒以内</td>
+</tr>
+<tr>
+<td>追加発注（受付）</td>
+<td>5秒以内</td>
+</tr>
+<tr>
+<td>承認処理</td>
+<td>5秒以内</td>
+</tr>
+<tr>
+<td>納品書PDF生成</td>
+<td>10秒以内</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_16">最適化施策<a class="headerlink" href="#_16" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>データベース</strong></li>
+<li>適切なインデックス作成</li>
+<li>N+1クエリの回避</li>
+<li>
+<p>コネクションプーリング</p>
+</li>
+<li>
+<p><strong>API</strong></p>
+</li>
+<li>非同期処理（FastAPI の async/await）</li>
+<li>
+<p>ジョブキュー（納品書PDF生成など）</p>
+</li>
+<li>
+<p><strong>ストレージ</strong></p>
+</li>
+<li>CDN導入（Phase2）</li>
+<li>署名付きURL のキャッシュ</li>
+</ol>
+<hr />
+<h2 id="_17">セキュリティ<a class="headerlink" href="#_17" title="Permanent link">&para;</a></h2>
+<h3 id="_18">認証<a class="headerlink" href="#_18" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>LINE</strong>: LINE User ID ベース</li>
+<li><strong>管理画面</strong>: Supabase Auth（Email + Password）</li>
+</ul>
+<h3 id="_19">認可<a class="headerlink" href="#_19" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>RLS</strong>: Supabase の Row Level Security で制御</li>
+<li><strong>店舗</strong>: 自店舗のデータのみアクセス可</li>
+<li><strong>本部/管理者</strong>: 全データアクセス可</li>
+</ul>
+<h3 id="_20">データ暗号化<a class="headerlink" href="#_20" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>通信</strong>: HTTPS（TLS 1.2以上）</li>
+<li><strong>保存</strong>: Supabase の標準暗号化（AES-256）</li>
+</ul>
+<h3 id="_21">脆弱性対策<a class="headerlink" href="#_21" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>SQLインジェクション</strong>: ORM/パラメータ化クエリ使用</li>
+<li><strong>XSS</strong>: 管理画面では入力サニタイズ</li>
+<li><strong>CSRF</strong>: トークン検証</li>
+</ul>
+<hr />
+<h2 id="_22">可用性<a class="headerlink" href="#_22" title="Permanent link">&para;</a></h2>
+<h3 id="_23">目標<a class="headerlink" href="#_23" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>稼働率</strong>: 99.9%（月間ダウンタイム: 約43分）</li>
+<li><strong>サービス時間</strong>: 24時間365日</li>
+</ul>
+<h3 id="supabase-sla">Supabase のSLA<a class="headerlink" href="#supabase-sla" title="Permanent link">&para;</a></h3>
+<ul>
+<li>稼働率保証: 99.9%（Proプラン）</li>
+<li>障害時の自動フェイルオーバー</li>
+</ul>
+<h3 id="_24">監視<a class="headerlink" href="#_24" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>死活監視</strong>: UptimeRobot など</li>
+<li><strong>エラー監視</strong>: Sentry など（Phase2）</li>
+<li><strong>アラート</strong>: 管理者LINEグループに通知</li>
+</ul>
+<hr />
+<h2 id="_25">スケーラビリティ<a class="headerlink" href="#_25" title="Permanent link">&para;</a></h2>
+<h3 id="phase1mvp">Phase1（MVP）<a class="headerlink" href="#phase1mvp" title="Permanent link">&para;</a></h3>
+<ul>
+<li>同時接続: 100ユーザー程度</li>
+<li>リクエスト: 1000req/day 程度</li>
+</ul>
+<h3 id="phase2">Phase2（拡張）<a class="headerlink" href="#phase2" title="Permanent link">&para;</a></h3>
+<ul>
+<li>同時接続: 500ユーザー</li>
+<li>リクエスト: 10000req/day</li>
+</ul>
+<h3 id="_26">スケールアップ施策<a class="headerlink" href="#_26" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>DB</strong>: Supabase のプラン変更（Proプラン以上）</li>
+<li><strong>Backend</strong>: インスタンス数増加（水平スケール）</li>
+<li><strong>ストレージ</strong>: CDN導入</li>
+</ol>
+<hr />
+<h2 id="_27">保守性<a class="headerlink" href="#_27" title="Permanent link">&para;</a></h2>
+<h3 id="_28">ログ<a class="headerlink" href="#_28" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>アプリケーションログ</strong>: 標準出力（Cloud Run等で自動収集）</li>
+<li><strong>監査ログ</strong>: データベースに記録</li>
+<li><strong>エラーログ</strong>: <code>requests.error_message</code> 等</li>
+</ul>
+<h3 id="_29">ドキュメント<a class="headerlink" href="#_29" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>要件定義書</strong>: 本ドキュメント</li>
+<li><strong>API仕様書</strong>: OpenAPI/Swagger（Phase2）</li>
+<li><strong>運用手順書</strong>: Phase2で作成</li>
+</ul>
+<h3 id="_30">コード品質<a class="headerlink" href="#_30" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>型チェック</strong>: mypy（Python）</li>
+<li><strong>リンター</strong>: ruff（Python）</li>
+<li><strong>フォーマッター</strong>: black（Python）</li>
+<li><strong>テスト</strong>: pytest（Phase2で本格導入）</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="フッターナビゲーション">
+        <a href="../documents/" class="btn btn-neutral float-left" title="9. 納品書生成"><span class="icon icon-circle-arrow-left"></span> 前へ</a>
+        <a href="../phases/" class="btn btn-neutral float-right" title="11. フェーズ">次へ <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  <a href="https://readthedocs.org">Read the Docs</a> 提供の <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> を使って <a href="https://www.mkdocs.org/">MkDocs</a> でビルドされました。
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="バージョン">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/kikuchi-mizuki/zaiko" class="fa fa-code-fork" style="color: #fcfcfc"> kikuchi-mizuki/zaiko</a>
+        </span>
+    
+    
+      <span><a href="../documents/" style="color: #fcfcfc">&laquo; 前へ</a></span>
+    
+    
+      <span><a href="../phases/" style="color: #fcfcfc">次へ &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
